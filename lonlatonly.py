@@ -3,9 +3,10 @@ import smtplib
 import urllib
 import geopy
 import json
+import config
 
-api='47032cb2779badc8a8a41370b64beff1'
-urlbase='http://api.openweathermap.org/data/2.5/weather?appid='+api
+
+urlbase='http://api.openweathermap.org/data/2.5/weather?appid='+config.api
 
 def get_weather(c):
     lati= c['latitude']
