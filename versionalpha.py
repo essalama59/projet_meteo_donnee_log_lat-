@@ -3,32 +3,25 @@ import config
 import smopy
 import matplotlib.pyplot as plt
 
+baseurl='http://api.openweathermap.org/data/2.5/weather?appid='+config.apikey + "&units=metric"
 
-urlbase='http://api.openweathermap.org/data/2.5/weather?appid='+config.api
-
-def get_weather(c):
-    lati= c['lat']
-    longi= c['lon']
-    url=urlbase+'&lat='+lati+'&lon='+longi+'&units=metric'
-    print(url)
-    recup= requests.get(url).json()
-    return(recup)
-
-def get_map(coords):
-    map = smopy.Map( (coords['lat_min'],coords['lon_min'],coords['lat_max'],coords['lon_max']) , z=8)
-    ax = map.show_mpl(figsize=(8,8))
-    plt.show()
-    return True
-
-def get_locations():
-    geocode=[]
-    lonlat=open('lonlatonly.txt', 'r')
+def get_locations(filename):
+    # Same as 01_carto.py
+    geocode=[] # geocode = tableau des listes de coord
+    lonlat=open(filename, 'r') # ouverture du fichier
     for line in lonlat:
-        lat,lon=line.split(',') #slip pour séparer les vigule
-        coord= {'lon': lon.strip(),'lat':lat} #strip pour supprimer les espaces
-        geocode.append(coord)
+        lon, lat=line.split(',') # on découpe la ligne à la ","
+        coord={} # coord est une liste vide
+        coord["lat"]=lon.strip() #on ajoute un objet "lon"
+        coord["lon"]=lat.strip()#on ajoute un objet "lat"
+        geocode.append(coord) # on ajoute la coord au tableau (à la fin)
+    return geocode #on renvoie notre joli tableau
 
-    return geocode
+def print_dict(l,titre):
+    # Same as 01_carto.py
+    print("==== %s ====" % titre)
+    for item in l:
+        print(item, " = ", l[item])
 
 def get_area(locations):
     # get area boundaries.
@@ -52,7 +45,19 @@ def get_area(locations):
     # finally , return directly a list
     return {'lat_min':lat_min, 'lat_max':lat_max, 'lon_min':lon_min,'lon_max':lon_max}
 
+def get_weather(c):
+    # Same as 01_carto.py
+    url = baseurl + "&lon="+c["lon"] + "&lat="+c['lat']
+    weather=requests.get(url).json()
+    print(weather)
+    c["temp"]=weather['main']['temp']
+    return c
 
+def get_map(coords):
+    map = smopy.Map( (coords['lat_min'],coords['lon_min'],coords['lat_max'],coords['lon_max']) , z=8)
+    ax = map.show_mpl(figsize=(8,8))
+    plt.show()
+    return True
 
 def main():
     #1 - get locations from file :
@@ -86,5 +91,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
